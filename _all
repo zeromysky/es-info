@@ -1,0 +1,75 @@
+elasticsearch
+
+【_all】
+是把所有其它字段中的值，以空格为分隔符组成一个大字符串，
+然后被分析和索引，但是不存储，也就是说它能被查询，但不能被取回显示。
+
+PUT my_index/user/1 
+{
+  "first_name":    "John",
+  "last_name":     "Smith",
+  "date_of_birth": "1970-10-24"
+}
+
+GET my_index/_search
+{
+  "query": {
+    "match": {
+      "_all": "john smith 1970"
+    }
+  }
+}
+
+query_string 和 simple_query_string 查询默认都是查询 _all 字段，除非指定了其它默认字段。
+
+GET _search
+{
+  "query": {
+    "query_string": {
+      "query": "john smith 1970"
+    }
+  }
+}
+相当于
+GET _search?q=john+smith+1970
+
+从【_all】排除 一些无用字段
+
+"include_in_all": false 或  "index": "no"
+
+
+定制的 _all , 多个字段合并到一个字段中 copy_to  
+
+PUT myindex
+{
+  "mappings": {
+    "mytype": {
+      "properties": {
+        "first_name": {
+          "type":    "string",
+          "copy_to": "full_name" 
+        },
+        "last_name": {
+          "type":    "string",
+          "copy_to": "full_name" 
+        },
+        "full_name": {
+          "type":    "string"
+        }
+      }
+    }
+  }
+}
+
+【_all取回字段】 存储
+
+PUT myindex
+{
+  "mappings": {
+    "mytype": {
+      "_all": {
+        "store": true
+      }
+    }
+  }
+}
